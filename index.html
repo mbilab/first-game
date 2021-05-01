@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css" rel="stylesheet" type='text/css'>
+    <link href='./app.css' type='text/css' rel='stylesheet'>
+    <title>game</title>
+  </head>
+  <body>
+    <!-- <div id='dio'></div> -->
+    <div id='main'>
+      <div id='phaser'></div>
+      <div class='control-panel'>
+        <div class='leaderboard'>
+          <table class='ui celled table leaderboard'>
+            <thead>
+              <tr>
+                <th colspan="3" class='center aligned'>
+                  Leaderboard
+                </th>
+              </tr>
+              <tr>
+                <th class='two wide center aligned'>Rank</th>
+                <th class='eight wide'>Name</th>
+                <th class='six wide'>Score</th>
+              </tr>
+            </thead>
+            <tbody id="target">
+            </tbody>
+          </table>
+        </div>
+        <div class='skill-bar'>
+          <div class='skill'>
+            <div class='cd' id='invisible'></div>
+            <i class="big eye slash outline icon"></i>
+            <div>Invisible</div>
+          </div>
+          <div class='skill'>
+            <div class='cd' id='zawarudo'></div>
+            <i class="big clock outline icon"></i>
+            <div>Zawarudo</div>
+          </div>
+          <div class='skill'>
+            <div class='cd' id='fall'></div>
+            <i class="big angle double down icon"></i>
+            <div>Landing</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/mustache@4.2.0/mustache.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script src='https://cdn.jsdelivr.net/npm/phaser@3.11.0/dist/phaser.js'></script>
+    <script src='./app.js'></script>
+  </body>
+</html>
