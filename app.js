@@ -28,7 +28,8 @@ function clearAllTimeouts() {
 
 function counter(skill, cd, count){
   portion = cd / 1000
-  document.getElementById(skill).style.height = `${100 / count * portion}%`
+  if (document.getElementById(skill))
+    document.getElementById(skill).style.height = `${100 / count * portion}%`
   if(cd<=0){
     this[skill] = true
   }
@@ -128,12 +129,14 @@ function create() {
   bombCollider = this.physics.add.collider(player, bombs, hitBomb, null, this)
   this.score = 0
   this.accelerate = 0
+  this.blink = true
   this.cd = true
   this.invisible = true
   this.fall = true
   this.nJump = 0
   this.zawarudo = true
   // this.dio = false
+  blinkKey = this.input.keyboard.addKey('v')
   boostKey = this.input.keyboard.addKey('z')
   invisibleKey = this.input.keyboard.addKey('x')
   zawarudoKey = this.input.keyboard.addKey('c')
@@ -167,8 +170,19 @@ function update() {
   if (boostKey.isUp)
     this.cd = true
 
-  if (this.accelerate != 0)
+  if (this.accelerate > 20)
+    this.accelerate = 0
+  else if (this.accelerate != 0)
     this.accelerate -= 1
+
+  // blink event
+  if (this.blink && blinkKey.isDown) {
+    this.blink = false
+    this.accelerate = 200
+    let cd = 2000
+    let count = cd / 1000
+    counter.call(this, 'blink', cd, count)
+  }
 
   // invisible event
   if (invisibleKey.isDown && this.invisible) {
@@ -187,7 +201,7 @@ function update() {
   // zarwarudo event
   if (this.zawarudo && zawarudoKey.isDown) {
     this.zawarudo = false
-    this.sound.play('zawarudo')
+    // this.sound.play('zawarudo')
     bombs.children.iterate( bomb => {
       bomb.body.enable = false
     } )
