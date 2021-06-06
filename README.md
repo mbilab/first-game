@@ -6,7 +6,7 @@ This project is derived from our [game tutorial](https://github.com/mbilab/Web-t
 
 
 # Run devServer
-`yarn dev
+yarn dev
 
 # Watch
 yarn build --watch
