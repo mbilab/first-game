@@ -1,3 +1,9 @@
+import Phaser from 'phaser'
+import axios from 'axios'
+import Swal from 'sweetalert2'
+import Mustache from 'mustache'
+
+
 const urlParams = new URLSearchParams(window.location.search)
 
 const config = {
@@ -27,7 +33,7 @@ function clearAllTimeouts() {
 }
 
 function counter(skill, cd, count){
-  portion = cd / 1000
+  var portion = cd / 1000
   if (document.getElementById(skill))
     document.getElementById(skill).style.height = `${100 / count * portion}%`
   if(cd<=0){
@@ -98,35 +104,35 @@ function create() {
   // Step 1.2 code goes here
   this.add.image(400, 300, 'sky')
   // Step 2 code goes here
-  platforms = this.physics.add.staticGroup()
+  var platforms = this.physics.add.staticGroup()
   platforms.create(400, 568, 'ground').setScale(2).refreshBody()
   platforms.create(600, 400, 'ground').setScale(1, .5).refreshBody()
   platforms.create( 50, 250, 'ground').setScale(1, .5).refreshBody()
   platforms.create(750, 220, 'ground').setScale(1, .5).refreshBody()
   // Step 3 code goes here
-  player = this.physics.add.sprite(100, 450, 'dude')
+  this.player = this.physics.add.sprite(100, 450, 'dude')
   // player.setBounce(.2)
-  player.setCollideWorldBounds(true)
+  this.player.setCollideWorldBounds(true)
   // Step 4.1 code goes here
   this.anims.create({ frameRate: 10, frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3 }), key: 'left', repeat: -1 })
   this.anims.create({ frameRate: 20, frames: [ { key: 'dude', frame: 4 } ], key: 'turn', })
   this.anims.create({ frameRate: 10, frames: this.anims.generateFrameNumbers('dude', { start: 5, end: 8 }), key: 'right', repeat: -1 })
 
-  cursors = this.input.keyboard.createCursorKeys()
+  this.cursors = this.input.keyboard.createCursorKeys()
   // Step 4.3 code goes here
-  this.physics.add.collider(player, platforms)
+  this.physics.add.collider(this.player, platforms)
   // Step 5.1 code goes here
-  stars = this.physics.add.group({ key: 'star', repeat: 11, setXY: { x: 12, y: 0, stepX: 70 } })
-  stars.children.iterate(star => star.setBounceY(Phaser.Math.FloatBetween(0.2, 0.3)))
-  this.physics.add.collider(stars, platforms)
+  this.stars = this.physics.add.group({ key: 'star', repeat: 11, setXY: { x: 12, y: 0, stepX: 70 } })
+  this.stars.children.iterate(star => star.setBounceY(Phaser.Math.FloatBetween(0.2, 0.3)))
+  this.physics.add.collider(this.stars, platforms)
   // Step 5.2 code goes here
-  this.physics.add.overlap(player, stars, collectStar, null, this)
+  this.physics.add.overlap(this.player, this.stars, collectStar, null, this)
   // Step 6.1 code goes here
-  scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' })
+  this.scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' })
   // Step 7.1 code goes here
-  bombs = this.physics.add.group()
-  this.physics.add.collider(bombs, platforms)
-  bombCollider = this.physics.add.collider(player, bombs, hitBomb, null, this)
+  this.bombs = this.physics.add.group()
+  this.physics.add.collider(this.bombs, platforms)
+  this.bombCollider = this.physics.add.collider(this.player, this.bombs, hitBomb, null, this)
   this.score = 0
   this.accelerate = 0
   this.blink = true
@@ -136,38 +142,38 @@ function create() {
   this.nJump = 0
   this.zawarudo = true
   // this.dio = false
-  blinkKey = this.input.keyboard.addKey('v')
-  boostKey = this.input.keyboard.addKey('z')
-  invisibleKey = this.input.keyboard.addKey('x')
-  zawarudoKey = this.input.keyboard.addKey('c')
+  this.blinkKey = this.input.keyboard.addKey('v')
+  this.boostKey = this.input.keyboard.addKey('z')
+  this.invisibleKey = this.input.keyboard.addKey('x')
+  this.zawarudoKey = this.input.keyboard.addKey('c')
   // this.sound.play('bgm', { volume: 0.3, loop: true})
 }
 
 function update() {
   // Step 4.2 code goes here
   const speed = 160
-  if (cursors.left.isDown) {
-    player.setVelocityX(-speed - this.accelerate*50)
-    player.anims.play('left', true)
-  } else if (cursors.right.isDown) {
-    player.setVelocityX(speed + this.accelerate*50)
-    player.anims.play('right', true)
+  if (this.cursors.left.isDown) {
+    this.player.setVelocityX(-speed - this.accelerate*50)
+    this.player.anims.play('left', true)
+  } else if (this.cursors.right.isDown) {
+    this.player.setVelocityX(speed + this.accelerate*50)
+    this.player.anims.play('right', true)
   } else{
-    player.setVelocityX(0)
-    player.anims.play('turn')
+    this.player.setVelocityX(0)
+    this.player.anims.play('turn')
   }
 
-  if (cursors.up.isDown && player.body.touching.down) {
-    player.setVelocityY(-330)
+  if (this.cursors.up.isDown && this.player.body.touching.down) {
+    this.player.setVelocityY(-330)
   }
 
   // boost event
-  if (boostKey.isDown && (this.accelerate == 0) && this.cd) {
+  if (this.boostKey.isDown && (this.accelerate == 0) && this.cd) {
     this.accelerate = 10
     this.cd = false
   }
 
-  if (boostKey.isUp)
+  if (this.boostKey.isUp)
     this.cd = true
 
   if (this.accelerate > 20)
@@ -176,7 +182,7 @@ function update() {
     this.accelerate -= 1
 
   // blink event
-  if (this.blink && blinkKey.isDown) {
+  if (this.blink && this.blinkKey.isDown) {
     this.blink = false
     this.accelerate = 200
     let cd = 2000
@@ -185,24 +191,24 @@ function update() {
   }
 
   // invisible event
-  if (invisibleKey.isDown && this.invisible) {
+  if (this.invisibleKey.isDown && this.invisible) {
     this.invisible = false
-    player.alpha = 0.5
-    bombCollider.active = false
+    this.player.alpha = 0.5
+    this.bombCollider.active = false
     let cd = 10000
     let count = cd / 1000
     document.getElementById('invisible').style.height = `${cd/100}%`
-    window.setTimeout(function(){
-      player.alpha = 1
-      bombCollider.active = true
+    window.setTimeout(()=>{
+      this.player.alpha = 1
+      this.bombCollider.active = true
     }, 3000)
   }
 
   // zarwarudo event
-  if (this.zawarudo && zawarudoKey.isDown) {
+  if (this.zawarudo && this.zawarudoKey.isDown) {
     this.zawarudo = false
     // this.sound.play('zawarudo')
-    bombs.children.iterate( bomb => {
+    this.bombs.children.iterate( bomb => {
       bomb.body.enable = false
     } )
     // this.dio = true
@@ -210,31 +216,31 @@ function update() {
     let cd = 15000
     let count = cd / 1000
     counter.call(this, 'zawarudo', cd, count)
-    window.setTimeout(function(){
-      bombs.children.iterate( bomb => bomb.body.enable = true )
+    window.setTimeout(()=>{
+      this.bombs.children.iterate( bomb => bomb.body.enable = true )
       document.getElementsByTagName('canvas')[0].style.filter = 'invert(0)'
     }, 2000)
   }
 
   // double jump event
-  if (player.body.touching.down)
+  if (this.player.body.touching.down)
     this.nJump = 0
 
-  if (!player.body.touching.down && (this.nJump == 0))
+  if (!this.player.body.touching.down && (this.nJump == 0))
     this.nJump = 1
 
-  if (cursors.up.isUp && (this.nJump == 1))
+  if (this.cursors.up.isUp && (this.nJump == 1))
     this.nJump = 2
 
-  if (cursors.up.isDown && (this.nJump == 2)) {
-    player.setVelocityY(-290)
+  if (this.cursors.up.isDown && (this.nJump == 2)) {
+    this.player.setVelocityY(-290)
     this.nJump = 3
   }
 
   // hero landing event
-  if (cursors.down.isDown && !player.body.touching.down && this.fall) {
+  if (this.cursors.down.isDown && !this.player.body.touching.down && this.fall) {
     this.fall = false
-    player.setVelocityY(800)
+    this.player.setVelocityY(800)
     let cd = 2000
     let count = cd / 1000
     document.getElementById('fall').style.height = `${100 / count * (cd / 1000)}%`
@@ -242,7 +248,7 @@ function update() {
   }
 
   // gameover check
-  if (this.gameOver && cursors.space.isDown){
+  if (this.gameOver && this.cursors.space.isDown){
     // this.registry.destroy()
     clearAllTimeouts()
     document.querySelectorAll('.cd').forEach(el => el.style.height = '0%')
@@ -263,14 +269,14 @@ function collectStar(player, star) {
 
   // Step 6.2 code goes here
   this.score += 10
-  scoreText.setText('Score: ' + this.score)
+  this.scoreText.setText('Score: ' + this.score)
   // Step 7.2 code goes here
-  if (0 == stars.countActive(true)) {
+  if (0 == this.stars.countActive(true)) {
     this.invisible = true
     document.getElementById('invisible').style.height = '0%'
-    stars.children.iterate(star => star.enableBody(true, star.x, 0, true, true))
+    this.stars.children.iterate(star => star.enableBody(true, star.x, 0, true, true))
     let x = player.x < 400 ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400)
-    let bomb = bombs.create(x, 16, 'bomb')
+    let bomb = this.bombs.create(x, 16, 'bomb')
     bomb.setBounce(1)
     bomb.setCollideWorldBounds(true)
     bomb.setVelocity(Phaser.Math.Between(-200, 200), 20)
@@ -289,7 +295,7 @@ function hitBomb(player, bomb) {
   // Step 8.3 code goes here
   this.sound.playAudioSprite('sfx', 'death')
 
-  obj = {
+  var obj = {
     rank: 99,
     name: window.playerName,
     score: this.score
